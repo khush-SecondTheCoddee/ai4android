@@ -21,6 +21,14 @@ DEFAULT_SYSTEM_PROMPT = (
     "Keep answers concise, safe, and actionable."
 )
 
+CODING_2B_SYSTEM_PROMPT = (
+    "You are a compact 2B-parameter coding agent running locally in Termux. "
+    "Prioritize practical code fixes, clear terminal commands, and concise steps. "
+    "Ask at most one clarifying question only if required. "
+    "For bugs: give root cause first, then patch. "
+    "For feature requests: provide minimal, working code with test commands."
+)
+
 
 @dataclass
 class ChatConfig:
@@ -140,6 +148,12 @@ def parse_args() -> argparse.Namespace:
         help="System prompt text",
     )
     parser.add_argument(
+        "--preset",
+        choices=["default", "coding-2b"],
+        default="default",
+        help="Apply a preset profile (default: default)",
+    )
+    parser.add_argument(
         "--history-file",
         default=str(Path.home() / ".termux-ai" / "history.json"),
         help="Conversation history file (default ~/.termux-ai/history.json)",
@@ -166,15 +180,26 @@ def main() -> int:
     history_path = None if args.no_history else Path(args.history_file).expanduser()
     messages: List[dict] = read_history(history_path) if history_path else []
 
+    system_prompt = args.system_prompt
+    temp = args.temp
+    top_p = args.top_p
+    repeat_penalty = args.repeat_penalty
+
+    if args.preset == "coding-2b":
+        system_prompt = CODING_2B_SYSTEM_PROMPT
+        temp = 0.2
+        top_p = 0.9
+        repeat_penalty = 1.05
+
     config = ChatConfig(
         llama_cli=args.llama_cli,
         model=model_path,
         ctx_size=args.ctx_size,
         threads=args.threads,
-        temp=args.temp,
-        top_p=args.top_p,
-        repeat_penalty=args.repeat_penalty,
-        system_prompt=args.system_prompt,
+        temp=temp,
+        top_p=top_p,
+        repeat_penalty=repeat_penalty,
+        system_prompt=system_prompt,
         history_file=history_path,
     )
 

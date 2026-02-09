@@ -10,6 +10,7 @@ A lightweight offline AI chat setup for **Android + Termux (non-root)** using yo
   - persistent chat history,
   - `/reset` to clear context,
   - configurable inference settings (threads, context size, temperature).
+- A built-in **"coding-2b" preset** tuned for small coding models (like 2B GGUF).
 
 ## 1) Install dependencies in Termux
 
@@ -38,11 +39,19 @@ git clone <your-repo-url> ai4android
 cd ai4android
 ```
 
-Run with default `llama-cli` in `PATH`:
+### Standard mode
 
 ```bash
 ./run-termux-ai.sh ~/models/your-model.gguf
 ```
+
+### No-code launch for a **custom 2B coding agent**
+
+```bash
+./run-termux-coder.sh ~/models/your-2b-coder.gguf
+```
+
+(Equivalent to running `termux_ai.py` with `--preset coding-2b`.)
 
 Or run with explicit binary path:
 
@@ -64,6 +73,20 @@ python termux_ai.py \
   --top-p 0.95
 ```
 
+## Presets
+
+- `--preset default`: General assistant behavior.
+- `--preset coding-2b`: Coding-focused behavior and conservative decoding values for small models.
+
+Example:
+
+```bash
+python termux_ai.py \
+  --model ~/models/your-2b-coder.gguf \
+  --llama-cli ~/llama.cpp/build/bin/llama-cli \
+  --preset coding-2b
+```
+
 ## In-chat commands
 
 - `/help` : show commands
@@ -80,4 +103,3 @@ python termux_ai.py \
 - No system service/background daemon is required.
 - Keep model files in `$HOME` storage for easier access (`~/models`).
 - If output is too slow, lower context size and thread count; use smaller quantized GGUF.
-
